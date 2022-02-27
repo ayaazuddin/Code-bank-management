@@ -32,7 +32,7 @@ include 'includes/dbconnect.php';
 
 						$run_sql = mysqli_query($con, $ins_sql);
 				
-						$success = "Money withdrawn successfully!";
+						$success = "Money withdrawn successfully! <br>".$iban;
 					}else{
 
 						$success = "You don't have enough balance!";
@@ -65,9 +65,11 @@ include 'includes/dbconnect.php';
 
     <!-- Favicon -->
     <link rel="icon" href="img/core-img/favicon.ico">
-
+    <link rel="stylesheet" href="./css/classy-nav.css">
+    <link rel="stylesheet" href="./css/owl.carousel.min.css">
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 
 </head>
 
@@ -96,7 +98,7 @@ include 'includes/dbconnect.php';
 
                         <!-- Top Contact Info -->
                         <div class="top-contact-info d-flex align-items-center">
-                            <a href="#" data-toggle="tooltip" data-placement="bottom" title="25 th Street Avenue, Karachi, PAK"><img src="img/core-img/placeholder.png" alt=""> <span>25 th Street Avenue, Karachi, PAK</span></a>
+                            <a href="#" data-toggle="tooltip" data-placement="bottom" title="Mumbai, India"><img src="img/core-img/placeholder.png" alt=""> <span>Mumbai, India</span></a>
                             <a href="#" data-toggle="tooltip" data-placement="bottom" title="info@credit.com"><img src="img/core-img/message.png" alt=""> <span>info@credit.com</span></a>
                         </div>
                     </div>
@@ -243,7 +245,7 @@ include 'includes/dbconnect.php';
 				<div class="form-group">
 					<label class="col-sm-3 control-label"></label>
 					<div class="col-sm-8">
-					<h4><?php echo $success ?></h4>
+					
 					</div>
 				</div>
 				

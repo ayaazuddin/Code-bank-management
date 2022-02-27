@@ -1,3 +1,69 @@
+<?php
+session_start();
+if(isset($_SESSION['usr_id'])!="") {
+header("Location: index.php");
+}
+include 'includes/dbconnect.php';
+//check if form is submitted
+$msg = '';
+if (isset($_POST['login'])) {
+$time= time()-30;
+$ip_address=getIpAddr();
+// Getting total count of hits on the basis of IP
+$query=mysqli_query($con,"SELECT count(*) as total_count from loginlogs where TryTime > $time and IpAddress=$ip_address");
+$check_login_row=mysqli_fetch_assoc($query);
+$total_count=$check_login_row['total_count'];
+//Checking if the attempt 3, or youcan set the no of attempt her. For now we taking only 3 fail attempted
+if($total_count==10){
+$msg="To many failed login attempts. Please login after 30 sec";
+}else{
+//Getting Post Values
+//$username=$_POST['username'];
+//$password=md5($_POST['password'])
+$email = mysqli_real_escape_string($con, $_POST['email']);
+$password = mysqli_real_escape_string($con, $_POST['password']);
+$result = mysqli_query($con, "SELECT * FROM employees WHERE emailid = '" . $email. "'
+and password = '" . $password . "'");
+if ($row = mysqli_fetch_array($result)) {
+$_SESSION['IS_LOGIN']='yes';
+$_SESSION['usr_id'] = $row['empid'];
+$_SESSION['usr_name'] = $row['empname'];
+mysqli_query($con,"delete from loginlogs where IpAddress='$ip_address'");
+
+if($_SESSION['usr_id']==1){
+header("Location: customer.php");
+}else{
+header("Location: admin.php");
+}
+} else {
+$errormsg = "Incorrect Email or Password!!!";
+$total_count++;
+$rem_attm=3-$total_count;
+if($rem_attm==0){
+$msg="Too many failed login attempts. Please login after 30 sec";
+}else{
+$msg="Please enter valid login details.<br/>$rem_attm attempts remaining";
+}
+$try_time=time();
+mysqli_query($con,"insert into loginlogs(IpAddress,TryTime,TimeofLogin) values('$ip_address','$try_time',CURRENT_TIMESTAMP)");
+}
+}}
+// Getting IP Address
+function getIpAddr(){
+if (!empty($_SERVER['HTTP_CLIENT_IP'])){
+$ipAddr=$_SERVER['HTTP_CLIENT_IP'];
+}elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+$ipAddr=$_SERVER['HTTP_X_FORWARDED_FOR'];
+}else{
+$ipAddr=$_SERVER['REMOTE_ADDR'];
+} return $ipAddr;
+}
+?>
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +76,9 @@
 
     <!-- Title -->
     <title>Credit.com - Credit Company </title>
-
+    <link rel="stylesheet" href="./css/classy-nav.css">
+    <link rel="stylesheet" href="./css/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
     <!-- Favicon -->
     <link rel="icon" href="img/core-img/favicon.ico">
 
@@ -18,7 +86,6 @@
     <link rel="stylesheet" href="style.css">
     <link href="layout/styles/layout.css" rel="stylesheet" type="text/css" a="all">
 <link href="login.css" rel="stylesheet" type="text/css" a="all">
-<!-- <link href="mainsignup.css" rel="stylesheet" type="text/css" a="all"> -->
 
 </head>
 
@@ -42,12 +109,12 @@
                     <div class="col-12 d-flex justify-content-between">
                         <!-- Logo Area -->
                         <div class="logo">
-                            <a href="index.html"><img src="img/core-img/logo.png" alt=""></a>
+                            <a href="index.php"><img src="img/core-img/logo.png" alt=""></a>
                         </div>
 
                         <!-- Top Contact Info -->
                         <div class="top-contact-info d-flex align-items-center">
-                            <a href="#" data-toggle="tooltip" data-placement="bottom" title="Mumbai, India"><img src="img/core-img/placeholder.png" alt=""> <span>VELLORE INSTITUTE OF TECHNOLOGY</span></a>
+                            <a href="#" data-toggle="tooltip" data-placement="bottom" title="Mumbai, India"><img src="img/core-img/placeholder.png" alt=""> <span>Mumbai, India</span></a>
                             <a href="#" data-toggle="tooltip" data-placement="bottom" title="info@credit.com"><img src="img/core-img/message.png" alt=""> <span>info@credit.com</span></a>
                         </div>
                     </div>
@@ -78,7 +145,7 @@
                             <!-- Nav Start -->
                             <div class="classynav">
                                 <ul>
-                                    <li><a href="index.html">Home</a></li>
+                                    <li><a href="index.php">Home</a></li>
                                     <li><a href="about.html">About Us</a></li>                                  
                                     <li><a href="contact.html">Contact</a></li>
                                 </ul>
@@ -88,7 +155,7 @@
 
                         <!-- Contact -->
                         <div class="contact">
-                            <a href="#"><img src="img/core-img/call2.png" alt=""> +92123456789 </a>
+                            <a href="#"><img src="img/core-img/call2.png" alt=""> 111 111 CREDIT </a>
                         </div>
                     </nav>
                 </div>
@@ -98,44 +165,29 @@
     <!-- ##### Header Area End ##### -->
 
     
-    <div class="container" style="margin-bottom: 50%;">
+    <div class="container">
         <div class="row-1">
-    <div class="form-1" >
+    <div class="form-1">
         
-        <form method="post" id="regForm" class="registrationForm" autocomplete="off">
+        <form method="post" id="regForm" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="registrationForm" autocomplete="off">
            
-                <div class="form-heading"><h1>Register</h1></div>
+                <div class="form-heading"><h1>Admin Log in</h1></div>
                 
                 <p>Email: <br>
-                    <input type="email" name="email" placeholder="Email" id="email" required>
+                    <input type="text" name="email" placeholder="Email" id="email" required>
                     </p>
     
                 <p>Password: <br>
             <input type="password" name="password" placeholder="Password" id="password" required>
             </p>
-            <p>Email: <br>
-                <input type="email" name="email" placeholder="Email" id="email" required>
-                </p>
-                <p>Phone-no: <br>
-                    <input type="text" name="quantity" min="0" max="11" placeholder="Contact no" id="phone" required>
-                    </p>
-               
-                    <p>Address: <br>
-                    <input type="text" name="address" id="address" required>
-                    </p>  
-                    <p>Upload CNIC <br>
-                        <input type="file" name="pic" accept="image/*" required/>
-                    </p>
-                    <p>Upload Your Image <br>
-                        <input type="file" name="image" accept="image/*" required/>
-                   </p>
         <!-- <input  type="submit" value="submit" class="submit"> -->
-        <p>
-            <input type="submit" value="SUBMIT" class="submit">
-            <p  class="already-registered">Already Registered. <a href="login.html">Login</a></p>
-        </p>
+        <input type="submit" name = "login" value="login" class="submit" style = "margin-right: 30%; ">
+        <!-- <p class="not-registered"><a href="user_account.html">Submit</a></p> -->
+            <p class="not-registered">Login as Customer <a href="login1.php">Login</a></p>
+        
         </form> 
-    
+        <span class="text-danger"><?php if (isset($errormsg)) { echo $errormsg; } ?></span>
+
     </div>
     </div> 
     </div>  
@@ -147,8 +199,58 @@
    
     <!-- ##### Call To Action End ###### -->
 
-    
-                
+    <!-- ##### Services Area Start ###### -->
+    <section class="services-area section-padding-100-0">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <!-- Section Heading -->
+                    <div class="section-heading text-center mb-100 wow fadeInUp" data-wow-delay="100ms">
+                        <h2>Our services</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Single Service Area -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="single-service-area d-flex mb-100 wow fadeInUp" data-wow-delay="200ms">
+                        <div class="icon">
+                            <i class="icon-profits"></i>
+                        </div>
+                        <div class="text">
+                            <h5>All the loans</h5>
+                            <!-- <p>Morbi ut dapibus dui. Sed ut iaculis elit, quis varius mauris. Integer ut ultricies orci, lobortis egestas sem.</p> -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Single Service Area -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="single-service-area d-flex mb-100 wow fadeInUp" data-wow-delay="500ms">
+                        <div class="icon">
+                            <i class="icon-smartphone-1"></i>
+                        </div>
+                        <div class="text">
+                            <h5>Secure financial services</h5>
+                            <!-- <p>Morbi ut dapibus dui. Sed ut iaculis elit, quis varius mauris. Integer ut ultricies orci, lobortis egestas sem.</p> -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Single Service Area -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="single-service-area d-flex mb-100 wow fadeInUp" data-wow-delay="600ms">
+                        <div class="icon">
+                            <i class="icon-diamond"></i>
+                        </div>
+                        <div class="text">
+                            <h5>Good investments</h5>
+                            <!-- <p>Morbi ut dapibus dui. Sed ut iaculis elit, quis varius mauris. Integer ut ultricies orci, lobortis egestas sem.</p> -->
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </section>
+    <!-- ##### Services Area End ###### -->
     <!-- ##### Footer Area Start ##### -->
     <footer class="footer-area section-padding-100-0">
         <div class="container">
@@ -161,11 +263,11 @@
                         <!-- Nav -->
                         <nav>
                             <ul>
-                                <li><a href="#">Homepage</a></li>
-                                <li><a href="#">About Us</a></li>
-                                <li><a href="#">Services &amp; Offers</a></li>
-                                <li><a href="#">Portfolio Presentation</a></li>
-                                <li><a href="#">The News</a></li>
+                                <li><a href="index.php">Homepage</a></li>
+                                <li><a href="about.html">About Us</a></li>
+                                <li><a href="services">Services &amp; Offers</a></li>
+                                <!-- <li><a href="">Portfolio Presentation</a></li> -->
+                                <li><a href="post.html">The News</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -178,11 +280,11 @@
                         <!-- Nav -->
                         <nav>
                             <ul>
-                                <li><a href="#">Our Loans</a></li>
-                                <li><a href="#">Trading &amp; Commerce</a></li>
-                                <li><a href="#">Banking &amp; Private Equity</a></li>
-                                <li><a href="#">Industrial &amp; Factory</a></li>
-                                <li><a href="#">Financial Solutions</a></li>
+                                <li><a href="login1.php">Our Loans</a></li>
+                                <li><a href="login1.php">Trading &amp; Commerce</a></li>
+                                <li><a href="login1.php">Banking &amp; Private Equity</a></li>
+                                <!-- <li><a href="login1.php">Industrial &amp; Factory</a></li> -->
+                                <li><a href="login1.php">Financial Solutions</a></li>
                             </ul>
                         </nav>
                     </div>

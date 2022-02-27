@@ -10,8 +10,10 @@ include 'includes/dbconnect.php';
 //check if form is submitted
 if (isset($_POST['login'])) {
 
-	$email = mysqli_real_escape_string($con, $_POST['email']);
-	$password = mysqli_real_escape_string($con, $_POST['password']);
+	// $email = mysqli_real_escape_string($con, $_POST['email']);
+	// $password = mysqli_real_escape_string($con, $_POST['password']);
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 	$result = mysqli_query($con, "SELECT * FROM employees WHERE emailid = '" . $email. "' and password = '" . $password . "'");
 
 	if ($row = mysqli_fetch_array($result)) {
@@ -84,7 +86,7 @@ if (isset($_POST['login'])) {
 
                         <!-- Top Contact Info -->
                         <div class="top-contact-info d-flex align-items-center">
-                            <a href="#" data-toggle="tooltip" data-placement="bottom" title="25 th Street Avenue, Karachi, PAK"><img src="img/core-img/placeholder.png" alt=""> <span>25 th Street Avenue, Karachi, PAK</span></a>
+                            <a href="#" data-toggle="tooltip" data-placement="bottom" title="Mumbai, India"><img src="img/core-img/placeholder.png" alt=""> <span>Mumbai, India</span></a>
                             <a href="#" data-toggle="tooltip" data-placement="bottom" title="info@credit.com"><img src="img/core-img/message.png" alt=""> <span>info@credit.com</span></a>
                         </div>
                     </div>
@@ -144,7 +146,7 @@ if (isset($_POST['login'])) {
                 <div class="form-heading"><h1>Admin Log in</h1></div>
                 
                 <p>Email: <br>
-                    <input type="email" name="email" placeholder="Email" id="email" required>
+                    <input type="text" name="email" placeholder="Email" id="email" required>
                     </p>
     
                 <p>Password: <br>
